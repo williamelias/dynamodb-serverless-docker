@@ -1,7 +1,8 @@
-# sls-public-prices
+# dynamodb-serverless
 
-Repositório que comporta a aplicação serverless de captura concorrentes
+Repositório destinado ao estudo da ferramenta serverless , com o provedor aws e com lambda de interação com API Gateway.
 
+Todos os objetos válidos , passados via POST são salvos em um banco Dynamodb rodando num docker.
 # Requirements:
     - node
     - serverless: npm install -g serverless

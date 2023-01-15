@@ -1,0 +1,93 @@
+
+BatchWriteItem: cria ou deleta itens em massa:
+
+	- Não há como atualizar itens em massa
+		- caso o item já exista ele será substituido
+
+	- A largura máxima do payload é de 16MB
+
+	caso algum item não seja processado por algum erro:
+	- será retornado como valores UnprocessedItems
+
+
+	Tips and tricks :
+
+	Typically, you would call BatchWriteItem in a loop. Each iteration would check for unprocessed items and submit a new BatchWriteItem request with those unprocessed items until all items have been processed.
+
+	documentação : 
+	- https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchWriteItem.html
+	- https://www.dynamodbguide.com/working-with-multiple-items/
+	- https://www.beabetterdev.com/2022/10/01/how-to-insert-multiple-dynamodb-items-at-once-with-boto3/
+
+Query: 
+
+	- Query results are always sorted by the sort key value
+	- If the data type of the sort key is Number, the results are returned in numeric order; otherwise, the results are returned in order of UTF-8 bytes
+	- By default, the sort order is ascending. To reverse the order, set the ScanIndexForward parameter to false. 
+	
+	Filtros disponíveis para PK:
+		
+
+	    a = b — true if the attribute a is equal to the value b
+
+	    a < b — true if a is less than b
+
+	    a <= b — true if a is less than or equal to b
+
+	    a > b — true if a is greater than b
+
+	    a >= b — true if a is greater than or equal to b
+
+	    a BETWEEN b AND c — true if a is greater than or equal to b, and less than or equal to c.
+
+	    begins_with (a, substr)— true if the value of attribute a begins with a particular substring.
+
+	
+	Filtros disponíveis para atributos não PK:
+	
+	Os mesmos do PK e:
+	
+	filter expressions can use the not-equals operator:
+	 (<>), the OR operator, the CONTAINS operator, the IN operator, the BEGINS_WITH operator, the BETWEEN operator, the EXISTS operator, and the SIZE 
+	
+
+	documentação: https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html
+
+
+unit test:
+	# store.py
+
+	def write(data, table_name):
+		dynamodb = boto3.resource('dynamodb')
+		table = dynamodb.Table(table_name)
+		with table.batch_writer() as batch:
+			batch.put_item(Item=data)
+
+
+
+	"""
+	Example of using moto to mock out DynamoDB table
+	"""
+
+	import boto3
+	from moto import mock_dynamodb2
+	import store
+
+
+	@mock_dynamodb2
+	def test_write_into_table():
+		"Test the write_into_table with a valid input data"
+		dynamodb = boto3.resource('dynamodb')
+		table_name = 'test'
+		table = dynamodb.create_table(TableName = table_name,
+									KeySchema = [
+									{'AttributeName': 'date', 'KeyType': 'HASH'}],
+									AttributeDefinitions = [
+									{'AttributeName': 'date', 'AttributeType': 'S'}])
+		data = {'date': '06-Nov-2020',
+				'organization': 'GeeksforGeeks', 'articles': 123456}
+		store.write(data, table_name)
+		response = table.get_item(Key={'date': data['date']})
+		actual_output = response['Item']
+		assert actual_output == data
+

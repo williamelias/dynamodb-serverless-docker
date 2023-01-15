@@ -1,0 +1,24 @@
+{
+    "Body": [
+        {
+            "color_eyes": "Black",
+            "age": 2,
+            "body color": "Black and white"
+        },
+        {
+            "color_eyes": "WHite",
+            "age": 3,
+            "body color": "Black"
+        },
+        {
+            "color_eyes": "Gray",
+            "age": 5,
+            "body color": "White"
+        },
+        {
+            "color_eyes": "Blue",
+            "age": 2,
+            "body color": "Orange"
+        }
+    ]
+}

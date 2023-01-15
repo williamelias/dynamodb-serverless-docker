@@ -1,10 +1,34 @@
 import json
+from copy import deepcopy
+import use_cases
 
-
-def hello(event, context):
-    body = {
-        "message": "Go Serverless v3.0! Your function executed successfully!",
-        "input": event,
+def manage_cats(event, context):
+    cats = json.loads(event.get('Body',[]))
+    print("Gatos a serem salvos:",cats)
+    for cat in cats:
+        save_cat = use_cases.SaveCat(data=cat)
+        save_cat.exec()
+  
+    return {
+        "status_code":200,
+        "message": "sucesss"
     }
 
-    return {"statusCode": 200, "body": json.dumps(body)}
+
+if __name__ == '__main__':
+    cats = {}
+    with open('mock/cats.json', 'rb') as file:
+        mock = json.load(file)
+    
+    formatted_cats = json.dumps(mock.get('Body',[]))
+
+    manage_cats(
+        event={
+            'Body':formatted_cats
+        },
+        context={}
+    )
+
+    print("Itens processados...")
+    while True:
+        pass

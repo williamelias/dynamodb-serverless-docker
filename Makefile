@@ -20,5 +20,14 @@ node_req:
 serverless_req:
 	serverless plugin install -n serverless-offline &&	serverless plugin install -n serverless-python-requirements && serverless plugin install -n serverless-dotenv-plugin
 
+up:
+	docker-compose up -d 
+
+build:
+	docker-compose build
+
 shell:
-	docker exec -it app-node python3
+	docker exec -it app python3
+
+stop:
+	docker-compose stop

@@ -2,12 +2,79 @@ org: williamelias
 app: dynamodb-serverless
 service: dynamodb-serverless
 
-frameworkVersion: '3'
+
+frameworkVersion: "3"
+
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
+
+custom:
+  pythonRequirements:
+    fileName: requirements.txt
+  serverless-offline:
+    httpPort: 8082
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.9
+  stage: "development"
+  region: "us-east-1"
+  environment:
+    QUEUE_NAME: ""
+    QUEUE_URL: https://sqs.us-east-1.amazonaws.com/<account>/${self:provider.environment.QUEUE_NAME}
+    REGION: ${self:provider.region}
+    STAGE: ${self:provider.stage}
+    TABLE_NAME: Cats-${opt:stage, self:provider.stage}
+
+  iam:
+    role:
+      name: dynamodbrole
+      statements:
+        - Effect: "Allow"
+          Action:
+            - sqs:SendMessage
+            - sqs:GetQueueAttributes
+            - sqs:GetQueueUrl
+            - sqs:ListQueues
+            - sqs:ReceiveMessage
+          Resource: "arn:aws:sqs:us-east-1:<account>:${self:provider.environment.QUEUE_NAME}"
+
+        - Effect: "Allow"
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:ListTables
+            - dynamodb:CreateTable
+            - dynamodb:GetItem
+            - dynamodb:Query
+          Resource: "*"
 
 functions:
-  hello:
-    handler: handler.hello
+  save_cats:
+    handler: handler.manage_cats
+    events:
+      - httpApi:
+          method: POST
+          path: /create_cats/
+
+resources:
+  Resources:
+    publicPrices:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: color_yes
+            AttributeType: S
+          - AttributeName: age
+            AttributeType: N
+        KeySchema:
+          - AttributeName: color_yes
+            KeyType: HASH
+          - AttributeName: age
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+
