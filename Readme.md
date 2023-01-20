@@ -1,68 +1,66 @@
-# dynamodb-serverless
+# Sobre
 
 Repositório destinado ao estudo da ferramenta serverless , com o provedor aws e com lambda de interação com API Gateway.
 
-Todos os objetos válidos , passados via POST são salvos em um banco Dynamodb rodando num docker.
-# Requirements:
-    - node
-    - serverless: npm install -g serverless
-    - to run serverless local: npm install serverless-offline
-    - to use python requirements: npm install serverless-python-requirements
-        - create env: virtualenv -p python3 .venv
-        - access: source .venv/bin/activate
-        - install requirements: pip3 install -r requirements.txt
-    - to use .env : npm i -D serverless-dotenv-plugin
+Todos os objetos válidos , passados via **POST** são salvos em um banco Dynamodb rodando num docker (Imagem fornecida pela própria AWS).
 
-## Comandos do serverless
 
-### info
-    sls info
+![serverless](serverless.png)
 
-### To create a serveless environment with Python and aws
-    serverless --template aws-python
 
-### To run function local
-    - sls invoke :
-        > local -f function_name
-        > -f function_name
-    with params:
-        -d "{'param':a}"
+# Para executar (Localmente)
 
-    run all local:
-        sls offline
-    run with local dynamodb:
-        sls offline start
-### To deploy 
-    - sls deploy 
-        or
-    - sls deploy -f function_name
-        or 
-    - sls deploy --stage qa
-    example: serverless deploy --stage prod --region us-east-1
-### local logs
-    sls logs -f function --tail
+**Necessário instalar (Para testes fora do container)**
 
-### Local test with vscode
 
-Need replace class SqsMessage to:
+- <code><img height="22" src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg"></code>
 
-    class SqsMessage:
-        def __init__(
-            self,
-            messageId: str,
-            body: str,
-            messageAttributes: dict=None,
-            *args,
-            **kwargs
-        ) -> None:
+Após instalar o Node,executar:
 
-            self.id: str = messageId
-            self.public_prices: typing.Iterable[dict] = body
-            self.attr: dict = messageAttributes
+    $ make node_req
+    $ cd dynamodb-serverless ; make serverless_req
 
-## setup to run with docker
+Abaixo temos algumas anotações a respeito de comandos do <code><img height="22" src="https://user-images.githubusercontent.com/2752551/30404912-d5781a00-989d-11e7-8d25-5ebca177326a.png"></code>:
 
-    docker-compose build
-    sudo chmod 777 ./docker/dynamodb
 
-    docker-compose up
+
+## Comandos do serverless (Para execução fora do container)
+
+**Obter informações da aplicação atual**
+
+    $ sls info
+
+**Para criar aplicação serverless com aws e python**
+
+    $ serverless --template aws-python
+
+**Executar uma função (lambda) localmente**
+
+    $ sls invoke
+
+**Executar o serveless localmente**
+
+    $ sls offline
+
+**Realizar Deploy:**
+
+    $ sls deploy 
+ou
+
+    $ sls deploy -f function_name
+
+ou 
+    $ sls deploy --stage qa
+    
+
+Exemplo: serverless deploy --stage prod --region us-east-1
+
+
+**Depurar localmente**
+
+    $ sls logs -f function --tail
+
+
+## Executar com docker compose
+
+    $ make build & sudo chmod 777 ./docker/dynamodb & make up
